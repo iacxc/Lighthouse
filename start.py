@@ -2,8 +2,8 @@
 
 
 import sys
-from Metrics import log_info, log_debug, \
-                    CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, MemoryMetrics
+from Logs import log_info, log_debug
+from Metrics import CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, MemoryMetrics
 
 LINUXCOUNTERS = 'linuxcounters'
 
