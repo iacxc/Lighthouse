@@ -7,6 +7,7 @@ from Metrics import log_info, log_debug, \
 
 LINUXCOUNTERS = 'linuxcounters'
 
+
 def set_proto_src(path):
     """ set the path of publications for google protocol buffer """
     if sys.path.count(path) == 0:
@@ -26,9 +27,9 @@ if __name__ == '__main__':
                    'topn_swap'     : TopNSwap}
 
     parser = OptionParser()
-    parser.add_option('-i', '--ip', dest = 'ip', default='127.0.0.1',
+    parser.add_option('-i', '--ip', dest='ip', default='127.0.0.1',
           help='ip address of the broker, [default: %default]')
-    parser.add_option('-p', '--port', dest = 'port', type=int, default=5672,
+    parser.add_option('-p', '--port', dest='port', type=int, default=5672,
           help='port of the broker, [default: %default]')
     parser.add_option('-d', '--datasensor', dest = 'datasensor', 
           help='datasensor to run, must be in [%s]' % ','.join(sensor_dict.keys()))
