@@ -1,0 +1,24 @@
+
+package linuxcounters;
+
+import "common.info_header.proto";
+
+message cpu_metrics { 
+   required common.info_header header  = 1;
+
+   required string host_name    = 2;
+   required int32 processor     = 3;
+   required int32 physical_id   = 4;
+   required int32 core_id       = 5;
+   required double avg_total    = 6;
+   required double avg_user     = 7;
+   required double avg_nice     = 8;
+   required double avg_system   = 9;
+   required double avg_idle     = 10;
+   required double avg_iowait   = 11;
+   required double avg_irq      = 12;
+   required double avg_soft_irq = 13;
+   required double avg_steal    = 14;
+   required double avg_guest    = 15;
+
+}

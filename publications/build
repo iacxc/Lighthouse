@@ -1,0 +1,33 @@
+#!/bin/bash
+
+PROTOSRC=(common.info_header.proto             \
+          linuxcounters.cpu_metrics.proto      \
+          linuxcounters.memory_metrics.proto   \
+          linuxcounters.topn_cpu.proto         \
+          linuxcounters.topn_runtime.proto     \
+          linuxcounters.topn_swap.proto        \
+          linuxcounters.topn_memory.proto      \
+         )
+
+OUTDIR=protos
+FINALOBJ=lh_publications.zip
+
+rm -f ../$FINALOBJ
+rm -rf $OUTDIR
+mkdir $OUTDIR
+
+for proto in ${PROTOSRC[*]}
+do
+    echo building $proto ...
+    protoc --python_out=$OUTDIR $proto
+done    
+
+for package in `ls ${PROTOSRC[*]} |cut -d'.' -f1|uniq`
+do
+    echo creating package $package ...
+    touch $OUTDIR/$package/__init__.py
+done
+
+cd $OUTDIR
+zip -r -1 ../../$FINALOBJ *
+

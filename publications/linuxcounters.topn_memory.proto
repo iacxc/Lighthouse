@@ -1,0 +1,57 @@
+
+package linuxcounters;
+import "common.info_header.proto";
+
+message topn_memory {
+    required common.info_header header    = 1;
+
+    required uint64 memory_bytes          = 2;
+    required uint32 sort_order            = 3;
+    optional int32  pid                   = 4;
+    optional string comm                  = 5;
+    optional string state                 = 6;
+    optional int32  ppid                  = 7;
+    optional int32  pgrp                  = 8;
+    optional uint32 session               = 9;
+    optional uint32 tty_nr                = 10;
+    optional int64  tpgid                 = 11;
+    optional uint32 flags                 = 12;
+    optional uint64 minflt                = 13;
+    optional uint64 cminflt               = 14;
+    optional uint64 majflt                = 15;
+    optional uint64 cmajflt               = 16;
+    optional uint64 utime                 = 17;
+    optional uint64 stime                 = 18;
+    optional uint64 cutime                = 19;
+    optional uint64 cstime                = 20;
+    optional uint64 priority              = 21;
+    optional uint64 nice                  = 22;
+    optional uint64 num_threads           = 23;
+    optional uint64 itrealvalue           = 24; // No longer in use
+    optional uint64 starttime             = 25;
+    optional uint64 vsize                 = 26;
+    optional uint64 rss                   = 27;
+    optional uint64 rsslim                = 28;
+    optional uint64 startcode             = 29;
+    optional uint64 endcode               = 30;
+    optional uint64 startstack            = 31;
+    optional uint64 kstkesp               = 32;
+    optional uint64 kstkeip               = 33;
+    optional uint64 signal                = 34; // No longer in use
+    optional uint64 blocked               = 35; // No longer in use
+    optional uint64 sigignore             = 36; // No longer in use
+    optional uint64 sigcatch              = 37; // No longer in use
+    optional uint64 wchan                 = 38;
+    optional uint64 nswap                 = 39;
+    optional uint64 cnswap                = 40;
+    optional uint64 exit_signal           = 41;
+    optional uint32 processor             = 42;
+    optional uint32 rt_priority           = 43;
+    optional uint32 policy                = 44;
+    optional uint64 delayacct_blkio_ticks = 45;
+    optional uint64 guest_time            = 46;
+    optional uint64 cguest_time           = 47;
+    optional string cmdline               = 48;
+    optional string owner                 = 49;
+
+}

@@ -1,0 +1,18 @@
+
+package linuxcounters;
+
+import "common.info_header.proto";
+message memory_metrics {
+
+   required common.info_header header  = 1;
+
+   required uint64 total = 2;
+   required uint64 free = 3;
+   required uint64 buffers = 4;
+   required uint64 cached = 5;
+   required uint64 swap_cached = 6;
+   required uint64 active = 7;
+   required uint64 inactive = 8;
+   required uint64 swap_total = 9;
+   required uint64 swap_free = 10;
+}

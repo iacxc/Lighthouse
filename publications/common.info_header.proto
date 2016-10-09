@@ -1,0 +1,10 @@
+
+package common;
+
+message info_header { 
+   required uint32 info_message_id   = 1;
+
+   required int64  info_generation_time_utc = 2;
+
+   required string info_hostid = 3;
+}
