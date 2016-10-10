@@ -21,7 +21,7 @@ from Funs import get_hostid, get_all_cpu_stats, get_all_proc_stats, \
 DEF_CONTENTTYPE = 'application/x-protobuf'
 
 _address_opt = '{create:always, node:{type:topic, durable:False}}'
-
+_exchange = 'amq.topic'
 
 ############################################
 # utility functions
@@ -82,8 +82,7 @@ class Producer(object):
 
 
 class QpidDataSensor(Thread):
-    def __init__(self, broker, routing_key=None, interval=60,
-                       exchange="amq.topic", skip_first=True):
+    def __init__(self, broker, routing_key=None, interval=60, skip_first=True):
         super(QpidDataSensor, self).__init__()
 
         self.daemon = True
@@ -94,7 +93,7 @@ class QpidDataSensor(Thread):
         self.__cv = Condition()
         self.__exit = False
 
-        self.__producer = Producer(broker, exchange)
+        self.__producer = Producer(broker, _exchange)
         self.__routing_key = routing_key
 
     @property
@@ -287,7 +286,7 @@ class TopNMemory(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNMemory, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect process statistics for topn memory"""
@@ -320,7 +319,7 @@ class TopNRuntime(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNRuntime, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect process statistics for topn runtime"""
@@ -353,7 +352,7 @@ class TopNSwap(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNSwap, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect process statistics for topn swap"""
@@ -403,7 +402,7 @@ class MemoryMetrics(QpidDataSensor):
     def __init__(self, broker_ip, broker_port, routing_key, interval):
         super(MemoryMetrics, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect memory statistics """
@@ -437,7 +436,7 @@ class LoadAvg(QpidDataSensor):
     def __init__(self, broker_ip, broker_port, routing_key, interval):
         super(LoadAvg, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect loadavg statistics """
@@ -465,7 +464,7 @@ class FileSystemMetrics(QpidDataSensor):
     def __init__(self, broker_ip, broker_port, routing_key, interval):
         super(FileSystemMetrics, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval, skip_first=False)
+            routing_key, interval, False)
 
     def collect(self):
         """ collect loadavg statistics """
