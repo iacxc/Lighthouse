@@ -1,0 +1,28 @@
+
+package linuxcounters;
+
+import "common.info_header.proto";
+
+message filesystem_metrics {
+
+    required common.info_header header = 1 ;
+
+    required string mnt_fsname = 2;
+    required string mnt_dir    = 3;
+    required string mnt_type   = 4;
+    required string mnt_opts   = 5;
+    required int32  mnt_freq   = 6;
+    required int32  mnt_passno = 7;
+
+    required int32  f_bsize    = 8;
+    required int32  f_frsize   = 9;
+    required int32  f_blocks   = 10;
+    required int32  f_bfree    = 11;
+    required int32  f_bavail   = 12;
+    required int32  f_files    = 13;
+    required int32  f_ffree    = 14;
+    required int32  f_favail   = 15;
+    required int32  f_fsid     = 16;
+    required int32  f_flag     = 17;
+    required int32  f_namemax  = 18;
+}

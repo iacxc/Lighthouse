@@ -238,3 +238,31 @@ def get_memory_info():
 
     return mem_info
 
+
+def is_dev_fstype(fstype, dev_fs_types=set()):
+    """
+        get all dev filesystem types
+    """
+    if len(dev_fs_types) == 0:
+        dev_fs_types = set(line.strip() for line in file('/proc/filesystems')
+                           if not line.startswith('nodev'))
+
+    return fstype in dev_fs_types
+
+
+def get_mtab():
+    """
+        get all the mounted filesystem
+    """
+    def parse_mtab_line(line):
+        items = line.strip().split(' ')
+        return {'fsname': items[0],
+                'dir':  items[1],
+                'type': items[2],
+                'opts': items[3],
+                'freq': int(items[4]),
+                'passno': int(items[5]),
+                }
+
+    return [parse_mtab_line(line) for line in file('/proc/mounts')]
+

@@ -3,7 +3,8 @@
 
 import sys
 from Logs import log_info, log_debug
-from Metrics import CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, MemoryMetrics
+from Metrics import CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, \
+                    MemoryMetrics, LoadAvg, FileSystemMetrics
 
 LINUXCOUNTERS = 'linuxcounters'
 
@@ -19,12 +20,15 @@ if __name__ == '__main__':
     import qpid.messaging.exceptions
     from optparse import OptionParser
 
-    sensor_dict = {'cpu_metrics'   : CpuMetrics,
+    sensor_dict = {'cpu_metrics': CpuMetrics,
                    'memory_metrics': MemoryMetrics,
-                   'topn_cpu'      : TopNCpu,
-                   'topn_memory'   : TopNMemory,
-                   'topn_runtime'  : TopNRuntime,
-                   'topn_swap'     : TopNSwap}
+                   'topn_cpu': TopNCpu,
+                   'topn_memory': TopNMemory,
+                   'topn_runtime': TopNRuntime,
+                   'topn_swap': TopNSwap,
+                   'loadavg_metrics': LoadAvg,
+                   'filesystem_metrics': FileSystemMetrics,
+                   }
 
     parser = OptionParser()
     parser.add_option('-i', '--ip', dest='ip', default='127.0.0.1',

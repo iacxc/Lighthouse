@@ -5,13 +5,15 @@
 """
 
 import socket
+import os
 import time
 from abc import abstractmethod
 from threading import Thread, Condition
 from qpid.messaging import Connection, Message
 
 from Logs import log_debug, log_info
-from Funs import get_hostid, get_all_cpu_stats, get_all_proc_stats, get_memory_info
+from Funs import get_hostid, get_all_cpu_stats, get_all_proc_stats, \
+                 get_memory_info, is_dev_fstype, get_mtab
 
 
 #############################################
@@ -81,8 +83,7 @@ class Producer(object):
 
 class QpidDataSensor(Thread):
     def __init__(self, broker, routing_key=None, interval=60,
-                       exchange="amq.topic",
-                       skip_first=True):
+                       exchange="amq.topic", skip_first=True):
         super(QpidDataSensor, self).__init__()
 
         self.daemon = True
@@ -218,8 +219,8 @@ class CpuMetrics(QpidDataSensor):
 
 
 class TopNBase(QpidDataSensor):
-    def __init__(self, broker, routing_key, interval=60):
-        super(TopNBase, self).__init__(broker, routing_key, interval)
+    def __init__(self, broker, routing_key, interval=60, skip_first=True):
+        super(TopNBase, self).__init__(broker, routing_key, interval, skip_first)
 
     @property
     def number(self):
@@ -286,7 +287,7 @@ class TopNMemory(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNMemory, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval)
+            routing_key, interval, skip_first=False)
 
     def collect(self):
         """ collect process statistics for topn memory"""
@@ -319,7 +320,7 @@ class TopNRuntime(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNRuntime, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval)
+            routing_key, interval, skip_first=False)
 
     def collect(self):
         """ collect process statistics for topn runtime"""
@@ -352,7 +353,7 @@ class TopNSwap(TopNBase):
     def __init__(self, broker_ip, broker_port, routing_key, interval=60):
         super(TopNSwap, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval)
+            routing_key, interval, skip_first=False)
 
     def collect(self):
         """ collect process statistics for topn swap"""
@@ -397,15 +398,15 @@ class TopNSwap(TopNBase):
 
 class MemoryMetrics(QpidDataSensor):
     """
-       data sensor to get cpu metrics
+       data sensor to get memory metrics
     """
     def __init__(self, broker_ip, broker_port, routing_key, interval):
         super(MemoryMetrics, self).__init__(
             '{0}:{1}'.format(broker_ip, broker_port),
-            routing_key, interval)
+            routing_key, interval, skip_first=False)
 
     def collect(self):
-        """ collect network statistics """
+        """ collect memory statistics """
         log_debug('Collecting data...')
 
         from linuxcounters.memory_metrics_pb2 import memory_metrics
@@ -427,4 +428,76 @@ class MemoryMetrics(QpidDataSensor):
 
         log_debug('Sending {0}'.format(metrics))
         self.send(metrics.SerializeToString())
+
+
+class LoadAvg(QpidDataSensor):
+    """
+       data sensor to get loadavg
+    """
+    def __init__(self, broker_ip, broker_port, routing_key, interval):
+        super(LoadAvg, self).__init__(
+            '{0}:{1}'.format(broker_ip, broker_port),
+            routing_key, interval, skip_first=False)
+
+    def collect(self):
+        """ collect loadavg statistics """
+        log_debug('Collecting data...')
+
+        from linuxcounters.loadavg_metrics_pb2 import loadavg_metrics
+
+        metrics = loadavg_metrics()
+        set_info_header(metrics.header)
+
+        loadavg = os.getloadavg()
+
+        metrics.one_min_avg     = loadavg[0]
+        metrics.five_min_avg    = loadavg[1]
+        metrics.fifteen_min_avg = loadavg[2]
+
+        log_debug('Sending {0}'.format(metrics))
+        self.send(metrics.SerializeToString())
+
+
+class FileSystemMetrics(QpidDataSensor):
+    """
+       data sensor to get filesystem metrics
+    """
+    def __init__(self, broker_ip, broker_port, routing_key, interval):
+        super(FileSystemMetrics, self).__init__(
+            '{0}:{1}'.format(broker_ip, broker_port),
+            routing_key, interval, skip_first=False)
+
+    def collect(self):
+        """ collect loadavg statistics """
+        log_debug('Collecting data...')
+
+        from linuxcounters.filesystem_metrics_pb2 import filesystem_metrics
+
+        metrics = filesystem_metrics()
+        set_info_header(metrics.header)
+
+        for mnt_entry in get_mtab():
+            if is_dev_fstype(mnt_entry['type']):
+                metrics.mnt_fsname = mnt_entry['fsname'];
+                metrics.mnt_dir    = mnt_entry['dir'];
+                metrics.mnt_type   = mnt_entry['type'];
+                metrics.mnt_opts   = mnt_entry['opts'];
+                metrics.mnt_freq   = mnt_entry['freq'];
+                metrics.mnt_passno = mnt_entry['passno'];
+
+                vfs = os.statvfs(mnt_entry['dir'])
+                metrics.f_bsize    = vfs.f_bsize;
+                metrics.f_frsize   = vfs.f_frsize;
+                metrics.f_blocks   = vfs.f_blocks;
+                metrics.f_bfree    = vfs.f_bfree;
+                metrics.f_bavail   = vfs.f_bavail;
+                metrics.f_files    = vfs.f_files;
+                metrics.f_ffree    = vfs.f_ffree;
+                metrics.f_favail   = vfs.f_favail;
+                metrics.f_fsid     = 0;
+                metrics.f_flag     = vfs.f_flag;
+                metrics.f_namemax  = vfs.f_namemax;
+
+                log_debug('Sending {0}'.format(metrics))
+                self.send(metrics.SerializeToString())
 

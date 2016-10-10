@@ -1,0 +1,14 @@
+
+package linuxcounters;
+
+import "common.info_header.proto";
+
+message loadavg_metrics {
+    required common.info_header header = 1;
+
+    required float one_min_avg         = 2;
+    required float five_min_avg        = 3;
+    required float fifteen_min_avg     = 4;
+}
+
+

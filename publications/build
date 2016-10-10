@@ -7,6 +7,8 @@ PROTOSRC=(common.info_header.proto             \
           linuxcounters.topn_runtime.proto     \
           linuxcounters.topn_swap.proto        \
           linuxcounters.topn_memory.proto      \
+          linuxcounters.loadavg_metrics.proto  \
+          linuxcounters.filesystem_metrics.proto  \
          )
 
 OUTDIR=protos

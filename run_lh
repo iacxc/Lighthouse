@@ -1,8 +1,14 @@
 #!/bin/sh -x
 
+DIR=`dirname $0`
+cd $DIR
 python start.py -f 30 -d cpu_metrics &
 python start.py -f 30 -d topn_cpu &
 python start.py -f 30 -d topn_memory &
 python start.py -f 30 -d topn_runtime &
 python start.py -f 30 -d topn_swap &
-#python start.py -f 30 -d cpu_metrics
+python start.py -f 60 -d memory_metrics &
+python start.py -f 60 -d loadavg_metrics &
+python start.py -f 60 -d filesystem_metrics
+
+
