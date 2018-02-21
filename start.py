@@ -2,8 +2,8 @@
 
 
 import sys
-from Logs import log_info, log_debug
-from Metrics import CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, \
+from .Logs import log_info, log_debug
+from .Metrics import CpuMetrics, TopNCpu, TopNMemory, TopNRuntime, TopNSwap, \
                     MemoryMetrics, LoadAvg, FileSystemMetrics
 
 LINUXCOUNTERS = 'linuxcounters'
@@ -71,7 +71,3 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         log_debug('Control-C pressed, exit ...')
-
-
-
-

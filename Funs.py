@@ -4,11 +4,15 @@
 
 """
 
-import re
+try:
+    from commands import getoutput
+except ImportError:
+    from subprocess import getoutput
+import glob
 import os
 import pwd
-import glob
-import commands
+import psutil
+import re
 
 #############################################
 # constants
@@ -16,9 +20,16 @@ CLK_TCK = os.sysconf('SC_CLK_TCK')
 PAGESIZE = os.sysconf('SC_PAGE_SIZE')
 
 
+def sequence_generator(start=0, step=1):
+    seq_num = start
+    while True:
+        yield seq_num
+        seq_num += step
+
+
 def get_hostid(buf=[]):
     if len(buf) == 0:
-        buf.append(commands.getoutput('hostid').strip())
+        buf.append(getoutput('hostid').strip())
 
     return buf[0]
 
@@ -32,7 +43,7 @@ def get_all_cpu_infos(cpu_infos={}):
         cpu = None
         processor_id = None
 
-        for line in file('/proc/cpuinfo'):
+        for line in open('/proc/cpuinfo'):
             try:
                 key, value = re.split(r'\s+:\s+', line.strip(), 1)
                 if key == 'processor':
@@ -60,7 +71,7 @@ def get_all_cpu_stats():
     """
     stats = []
     cpu_infos = get_all_cpu_infos()
-    for line in file('/proc/stat'):
+    for line in open('/proc/stat'):
         if not line.startswith('cpu'):
             continue
         fields = line.split()
@@ -89,10 +100,10 @@ def get_all_cpu_stats():
                 stat['idle'] + stat['iowait'] + stat['irq'] + stat['softirq']
 
         if len(fields) > 8:
-            stat['steal'] = int(fields[8]) * 1000 / CLK_TCK
+            stat['steal'] = int(fields[8]) * 1000 // CLK_TCK
 
         if len(fields) > 9:
-            stat['guest'] = int(fields[9]) * 1000 / CLK_TCK
+            stat['guest'] = int(fields[9]) * 1000 // CLK_TCK
 
         stats.append(stat)
 
@@ -101,7 +112,7 @@ def get_all_cpu_stats():
 
 def get_uptime():
     """ get uptime from /proc/uptime """
-    with file('/proc/uptime') as fhuptime:
+    with open('/proc/uptime') as fhuptime:
         uptime = fhuptime.read().split()[0]
         return float(uptime)
 
@@ -117,9 +128,9 @@ def get_proc_stat(pid):
         st = os.stat(stat_file)
         pw = pwd.getpwuid(st.st_uid)
 
-        fields = file(stat_file).readline().split()
+        fields = open(stat_file).readline().split()
 
-        stat = {'pid'   : int(pid),
+        stat = {'pid'   : pid,
                 'owner' : pw.pw_name,
                 'comm'  : fields[1].strip('()'),
                 'state' : fields[2],
@@ -170,17 +181,16 @@ def get_proc_stat(pid):
                 'cguest_time'                # 43
                ]
 
-        for i, field_name in enumerate(field_names):
+        for i, field_name in enumerate(field_names, 3):
             try:
-
                 if field_name in ('utime', 'stime',
                                   'cutime', 'cstime',
                                   'guest_time', 'cguest_time',
                                   'starttime'):
                     # convert to seconds
-                    stat[field_name] = int(fields[i+3]) * 1000 / CLK_TCK
+                    stat[field_name] = int(fields[i]) * 1000 // CLK_TCK
                 else:
-                    stat[field_name] = int(fields[i+3])
+                    stat[field_name] = int(fields[i])
             except ValueError:
                 #convert error, just ignore
                 pass
@@ -192,7 +202,7 @@ def get_proc_stat(pid):
         stat['memory_bytes'] = stat['rss'] * PAGESIZE
 
         cmd_file = '/proc/{0}/cmdline'.format(pid)
-        stat['cmdline'] = ' '.join(file(cmd_file).readline().split(chr(0)))
+        stat['cmdline'] = ' '.join(open(cmd_file).readline().split(chr(0)))
 
         return stat
 
@@ -212,14 +222,11 @@ def get_all_proc_stats():
         return a dict containing the process stat for all running processes
         key is pid, content is the stat data
     """
-    pid_list = [os.path.basename(path) for path in glob.glob('/proc/[0-9]*')
-                                       if os.path.exists(path + '/stat')]
-
     stats = {}
-    for pid in pid_list:
+    for pid in psutil.pids():
         stat = get_proc_stat(pid)
         if not stat is None:
-            stats[int(pid)] = stat
+            stats[pid] = stat
 
     return stats
 
@@ -229,7 +236,7 @@ def get_memory_info():
        get memory information from /proc/meminfo
     """
     mem_info = {}
-    with file('/proc/meminfo') as fhmem:
+    with open('/proc/meminfo') as fhmem:
         for line in fhmem:
             fields = line.split(':')
             key = fields[0]
@@ -244,7 +251,7 @@ def is_dev_fstype(fstype, dev_fs_types=set()):
         get all dev filesystem types
     """
     if len(dev_fs_types) == 0:
-        dev_fs_types = set(line.strip() for line in file('/proc/filesystems')
+        dev_fs_types = set(line.strip() for line in open('/proc/filesystems')
                            if not line.startswith('nodev'))
 
     return fstype in dev_fs_types
@@ -264,5 +271,5 @@ def get_mtab():
                 'passno': int(items[5]),
                 }
 
-    return [parse_mtab_line(line) for line in file('/proc/mounts')]
+    return [parse_mtab_line(line) for line in ('/proc/mounts')]
 

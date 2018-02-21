@@ -26,20 +26,10 @@ _exchange = 'amq.topic'
 ############################################
 # utility functions
 #
-
-def sequence_generator(start=0):
-    seq = [start]
-
-    def sequencer(step=1):
-        seq[0] += step
-        return seq[0]
-
-    return sequencer
-
-next_sequence_num = sequence_generator()
+sequence_num = sequence_generator()
 
 def set_info_header(header):
-    header.info_message_id = next_sequence_num()
+    header.info_message_id = next(sequence_num)
     header.info_generation_time_utc = int(time.time() * 1000000)
     header.info_hostid = get_hostid()
 
