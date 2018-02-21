@@ -4,15 +4,13 @@
 
 """
 
-try:
-    from commands import getoutput
-except ImportError:
-    from subprocess import getoutput
 import glob
 import os
 import pwd
 import psutil
 import re
+import subprocess
+
 
 #############################################
 # constants
@@ -29,7 +27,7 @@ def sequence_generator(start=0, step=1):
 
 def get_hostid(buf=[]):
     if len(buf) == 0:
-        buf.append(getoutput('hostid').strip())
+        buf.append(subprocess.check_output('hostid').strip())
 
     return buf[0]
 

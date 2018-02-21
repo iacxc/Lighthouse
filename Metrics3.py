@@ -13,6 +13,7 @@ from Logs import log_info, log_debug
 
 
 __all__ = ('LoadAvgMetrics',
+           'TopNMemory', 'TopNRuntime', 'TopNCpu', 'TopNSwap',
           )
 
 ############################################
@@ -293,25 +294,4 @@ class TopNSwap(TopNBase):
 
 
 if __name__ == '__main__':
-    def set_proto_src(path):
-        """ set the path of publications for google protocol buffer """
-        if sys.path.count(path) == 0:
-            sys.path.append(path)
-
-    def print_handler(*args):
-        #print(time.time(), args)
-        print(time.time(), args[0])
-
-    set_proto_src('/c/caiche/Github/Lighthouse/lh_publications.zip')
-    m = TopNSwap(routing_key='linuxcounters.topnswap', 
-                   interval=3, handler=print_handler)
-#    m2 = LoadAvgMetrics(routing_key='linuxcounters.loadavg', 
-#                   interval=3, handler=print_handler)
-#    m2.start()
-    m.start()
-
-    time.sleep(10)
-    m.stop()
-#    m2.stop()
-
-    time.sleep(3)
+    print('Metrics')
